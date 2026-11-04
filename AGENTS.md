@@ -51,6 +51,7 @@ Há um modelo vazio em `casos/_modelo-de-caso/`. Para um caso novo, copie-o e re
 | Protocolo | O que faz |
 |---|---|
 | `criar-protocolo` | Constrói um novo protocolo com o usuário, por entrevista (sem programar) |
+| `orquestrar` | Divide um trabalho de várias etapas em tarefas, delega a subagentes especialistas e confere cada entrega |
 | `organizar-caso` | Lê uma pilha de documentos e gera o `SUMARIO.md` do caso |
 | `transcrever` | Transcreve áudio/vídeo (reunião, audiência, depoimento) em texto |
 | `diagnosticar` | Mapeia forças e fragilidades do caso → `DIAGNOSTICO.md` |
@@ -65,11 +66,23 @@ Os protocolos também podem ser acionados por um pedido em linguagem natural. Pa
 invocação explícita, use `/nome` no Claude Code; no Codex, mencione `$nome` ou escolha
 o protocolo em `/skills`.
 
+## Orquestração e subagentes
+
+Pedidos que atravessam várias etapas do método seguem o protocolo `orquestrar`: o
+orquestrador planeja, delega cada tarefa a um especialista com o mínimo de material,
+confere a entrega contra a fonte e colhe as aprovações do usuário. Subagente não
+conversa com o usuário nem instala programas. No Claude Code, os especialistas estão
+em `.claude/agents/` e o orquestrador pode ser o agente principal com
+`claude --agent orquestrador`. Os subagentes só apontam para protocolos canônicos;
+não ponha regra jurídica neles.
+
 ## Fonte canônica e sincronização
 
 - `.agents/skills/` é a fonte canônica, independente de fornecedor.
 - `.claude/skills/` é o espelho de compatibilidade com o Claude Code. Não edite esse
   espelho diretamente.
+- `.claude/agents/` guarda os subagentes do Claude Code; `agents/` é a cópia lida pelo
+  plugin. Não edite `agents/` diretamente.
 - Depois de criar ou alterar um protocolo, rode
   `bash ferramentas/manutencao/sincronizar-skills.sh`.
 - Antes de concluir uma alteração, rode

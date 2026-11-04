@@ -16,6 +16,11 @@ ESPELHOS = {
     "skills": RAIZ / "skills",                        # adaptador de plugin
 }
 
+# Subagentes do Claude Code: adaptador fino em .claude/agents/, copiado para agents/
+# (lido pelo plugin). Cada subagente só aponta para protocolos canônicos.
+AGENTES = RAIZ / ".claude" / "agents"
+ESPELHO_AGENTES = RAIZ / "agents"
+
 # Bundle curado publicado como plugin Codex/OpenAI: subconjunto da fonte canônica
 # com apenas as skills autônomas (ver .codex-plugin/README.md e sincronizar-skills.sh).
 BUNDLE_CODEX = RAIZ / ".codex-plugin" / "skills"
@@ -112,6 +117,41 @@ def validar_texto_portavel(relativo: Path, texto: str) -> list[str]:
     return erros
 
 
+def validar_agente(relativo: Path, texto: str, dados: dict[str, str], nome_arquivo: str) -> list[str]:
+    """Um subagente precisa de name/description e de ao menos um protocolo canônico existente."""
+    erros: list[str] = []
+    if not dados.get("name"):
+        erros.append(f"{relativo}: frontmatter sem 'name'.")
+    elif dados["name"] != nome_arquivo:
+        erros.append(
+            f"{relativo}: name '{dados['name']}' não corresponde ao arquivo '{nome_arquivo}.md'."
+        )
+    if not dados.get("description"):
+        erros.append(f"{relativo}: frontmatter sem 'description'.")
+    referencias = re.findall(r"\.agents/skills/([^\s`\"')]+/SKILL\.md)", texto)
+    if not referencias:
+        erros.append(f"{relativo}: subagente não aponta para nenhum protocolo em .agents/skills/.")
+    for referencia in referencias:
+        if not (FONTE / referencia).is_file():
+            erros.append(f"{relativo}: protocolo não encontrado: .agents/skills/{referencia}")
+    return erros
+
+
+def validar_agentes() -> list[str]:
+    erros: list[str] = []
+    if not AGENTES.is_dir():
+        return erros
+    for agente in sorted(AGENTES.glob("*.md")):
+        texto = agente.read_text(encoding="utf-8")
+        erros.extend(
+            validar_agente(agente.relative_to(RAIZ), texto, ler_frontmatter(agente), agente.stem)
+        )
+    erros.extend(
+        comparar_arvores("agents", arquivos_da_arvore(AGENTES), arquivos_da_arvore(ESPELHO_AGENTES))
+    )
+    return erros
+
+
 def validar() -> list[str]:
     erros: list[str] = []
 
@@ -169,6 +209,8 @@ def validar() -> list[str]:
         )
     )
 
+    erros.extend(validar_agentes())
+
     return erros
 
 
@@ -182,7 +224,11 @@ def main() -> int:
         return 1
 
     total = len(list(FONTE.glob("*/SKILL.md")))
-    print(f"Compatibilidade validada: {total} skills portáveis e sincronizadas.")
+    agentes = len(list(AGENTES.glob("*.md"))) if AGENTES.is_dir() else 0
+    print(
+        f"Compatibilidade validada: {total} skills portáveis e sincronizadas; "
+        f"{agentes} subagentes apontando para protocolos canônicos."
+    )
     return 0
 
 

@@ -102,6 +102,10 @@ Traduzem os protocolos para as superfícies de execução. Hoje o projeto manté
   A v0.3 acrescenta um **MCP hospedado** (`mcp.advocaciaaberta.org/mcp`) que conecta o
   acervo — busca de legislação, súmulas, temas, teses e julgados — direto ao Claude e ao
   ChatGPT; buscas ao vivo (TJPR) e ferramentas locais seguem na via plena;
+- `.claude/agents/` (copiado para `agents/`, lido pelo plugin) com os subagentes do Claude
+  Code: o orquestrador e um especialista por protocolo. São adaptadores finos — cada um
+  só aponta para o protocolo que executa; a regra de orquestração mora no protocolo
+  `orquestrar`;
 - `AGENTS.md` e `CLAUDE.md` para instruções persistentes.
 
 Adaptadores não devem conter conhecimento jurídico exclusivo. Se uma regra existe
@@ -126,6 +130,7 @@ pelo Git por padrão, exceto pelo modelo vazio e sua documentação.
 | Transcrição | `ferramentas/processamento/transcrever/` | Motor de processamento |
 | Skills canônicas | `.agents/skills/` | Protocolos + adaptador atual |
 | Skills Claude | `.claude/skills/` | Espelho de compatibilidade |
+| Subagentes Claude | `.claude/agents/` e `agents/` | Adaptador de orquestração |
 | Gestão de contexto | `GERENCIAR-CONTEXTO.md` | Protocolo fundamental |
 | Casos | `casos/` | Espaço privado de trabalho |
 

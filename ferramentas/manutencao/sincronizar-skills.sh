@@ -55,5 +55,14 @@ sincronizar "${REPO_ROOT}/.claude/skills/"   # adaptador Claude Code (nível pro
 sincronizar "${REPO_ROOT}/skills/"           # adaptador de plugin (lido via .claude-plugin/)
 sincronizar_curado "${REPO_ROOT}/.codex-plugin/skills/" "${BUNDLE_CODEX_SKILLS[@]}"  # bundle curado do plugin Codex
 
+# Subagentes do Claude Code: a fonte é .claude/agents/ (adaptador fino que só aponta
+# para os protocolos canônicos); o plugin lê a cópia em agents/.
+AGENTES="${REPO_ROOT}/.claude/agents/"
+if [ -d "${AGENTES}" ]; then
+  mkdir -p "${REPO_ROOT}/agents/"
+  rsync -a --delete --exclude='.DS_Store' "${AGENTES}" "${REPO_ROOT}/agents/"
+fi
+
 echo "Skills sincronizadas: .agents/skills/ → .claude/skills/, → skills/ e → .codex-plugin/skills/ (curado)"
+echo "Subagentes sincronizados: .claude/agents/ → agents/"
 python3 "${SCRIPT_DIR}/verificar_compatibilidade.py"
