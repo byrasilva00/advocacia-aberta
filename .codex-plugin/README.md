@@ -36,7 +36,7 @@ neste bundle; seguem disponíveis para quem usa o Codex/desktop sobre o reposit�
   manifesto** (`.codex-plugin/`). **A confirmar** com o `@plugin-creator`/marketplace local
   antes da submissão: se a resolução for relativa à raiz do plugin (raiz do repo), trocar
   para `"./.codex-plugin/skills/"`. Não deixar `"./skills/"` apontar para o `skills/` da
-  raiz — aquele é o espelho completo de 10 skills, usado pelo `.claude-plugin/`.
+  raiz — aquele é o espelho completo de 11 skills, usado pelo `.claude-plugin/`.
 
 ## Caminhos portáveis
 

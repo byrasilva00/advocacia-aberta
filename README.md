@@ -29,7 +29,7 @@ O projeto nasce de ativos operacionais, não apenas de uma proposta:
 | Temas | 1.462 temas repetitivos do STJ e 1.470 temas de repercussão geral do STF |
 | Informativo | 11.567 julgados resumidos do Informativo STF, em 1.211 edições |
 | Espelhos de acórdãos | 11.133 acórdãos dos órgãos uniformizadores do STJ (Corte Especial e Seções — não a totalidade dos acórdãos), com ementa e tese |
-| Protocolos | 10 protocolos para organizar, transcrever, diagnosticar, pesquisar, redigir, revisar e diagramar |
+| Protocolos | 11 protocolos para organizar, transcrever, diagnosticar, pesquisar, redigir, revisar, diagramar e orquestrar o trabalho entre subagentes |
 | Motores | Vade Mecum para busca jurídica local, busca no TJPR, transcrição e processamento de documentos |
 | Adaptadores | Compatibilidade com Claude Code e Codex, sem duplicar a regra jurídica |
 
@@ -139,6 +139,14 @@ Invocação explícita:
 O agente também pode selecionar automaticamente um protocolo quando o pedido corresponde à sua
 descrição.
 
+**Trabalho de várias etapas — o orquestrador.** Para pedidos que atravessam o método inteiro
+("organize, pesquise, redija e revise a contestação"), o protocolo `orquestrar` divide o trabalho em
+tarefas, delega cada uma a um especialista e confere cada entrega antes de seguir. No Claude Code,
+os especialistas já existem como subagentes em `.claude/agents/` (`organizador`, `transcritor`,
+`diagnosticador`, `pesquisador`, `redator`, `revisor`, `diagramador`); para abrir a sessão com o
+orquestrador no comando, rode `claude --agent orquestrador`, ou peça `/orquestrar casos/meu-caso`
+numa sessão comum. Em agente sem subagentes, o mesmo protocolo roda em sequência.
+
 **Alternativa — instalar como plugin do Claude Code:**
 
 ```bash
@@ -215,6 +223,7 @@ armazenamento seguro e julgamento profissional. Leia a
 ├── CLAUDE.md                # ponte das mesmas instruções para Claude Code
 ├── .agents/skills/          # fonte canônica dos protocolos executáveis
 ├── .claude/skills/          # espelho gerado para Claude Code
+├── .claude/agents/          # subagentes do Claude Code (orquestrador e especialistas)
 ├── base-juridica/           # catálogo, taxonomia e governança da base
 ├── ferramentas/
 │   ├── pesquisa/            # Vade Mecum (motor + dados) e busca no TJPR
@@ -237,8 +246,10 @@ Code, nível projeto) e `skills/` (lido pelo plugin, via `.claude-plugin/`). Nun
 bash ferramentas/manutencao/sincronizar-skills.sh
 ```
 
-A sincronização regenera os dois espelhos e roda o verificador de compatibilidade, que também roda
-no GitHub Actions.
+A sincronização regenera os dois espelhos, copia os subagentes de `.claude/agents/` para `agents/`
+(lido pelo plugin) e roda o verificador de compatibilidade, que também roda no GitHub Actions. Os
+subagentes são adaptadores finos: cada um só aponta para o protocolo canônico que executa, e o
+verificador recusa subagente que não aponte para um protocolo existente.
 
 Ao escrever um comando de skill que chama um motor ou script do kit, prefixe o caminho com
 `${CLAUDE_PLUGIN_ROOT:-.}` — por exemplo,

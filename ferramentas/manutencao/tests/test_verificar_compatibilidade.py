@@ -74,6 +74,32 @@ class VerificadorCompatibilidadeTest(unittest.TestCase):
         self.assertIn("Espelho teste/ divergente da fonte canônica: div.txt", texto)
         self.assertNotIn("igual.txt", texto)
 
+    def test_agente_valido_aponta_para_protocolo_existente(self) -> None:
+        texto = "Siga `.agents/skills/4.1-revisar-peca/SKILL.md`."
+        erros = compatibilidade.validar_agente(
+            Path(".claude/agents/revisor.md"),
+            texto,
+            {"name": "revisor", "description": "revisa"},
+            "revisor",
+        )
+        self.assertEqual(erros, [])
+
+    def test_agente_sem_protocolo_ou_com_protocolo_inexistente(self) -> None:
+        sem = compatibilidade.validar_agente(
+            Path(".claude/agents/x.md"), "sem referência", {"name": "x", "description": "d"}, "x"
+        )
+        self.assertIn("não aponta para nenhum protocolo", "\n".join(sem))
+        inexistente = compatibilidade.validar_agente(
+            Path(".claude/agents/x.md"),
+            "Siga `.agents/skills/9.9-nao-existe/SKILL.md`.",
+            {"name": "y", "description": ""},
+            "x",
+        )
+        texto = "\n".join(inexistente)
+        self.assertIn("protocolo não encontrado", texto)
+        self.assertIn("não corresponde ao arquivo", texto)
+        self.assertIn("sem 'description'", texto)
+
 
 if __name__ == "__main__":
     unittest.main()
